@@ -78,7 +78,7 @@ SELECT CiudadID, COUNT(*) AS Filas FROM FactVentas GROUP BY CiudadID;
 
 | Pregunta | Tu respuesta |
 |---|---|
-| ¿Cuántas filas retorna GROUP BY? ¿Por qué? | |
+| ¿Cuántas filas retorna GROUP BY? ¿Por qué? | Retorna 6 filas. Porque agrupa las 500 transacciones según las 6 ciudades únicas que existen en la base de datos. |
 
 ### Paso 2 — El veredicto de Leticia con GROUP BY
 
@@ -100,9 +100,9 @@ ORDER BY Margen_Aproximado ASC;
 
 | Pregunta | Tu respuesta |
 |---|---|
-| ¿Qué CiudadID tiene Margen_Aproximado negativo? | |
-| ¿Cuánto es esa pérdida? | |
-| ¿Coincide con el número de Power BI de S4? | SÍ / NO |
+| ¿Qué CiudadID tiene Margen_Aproximado negativo? | El CiudadID 6 (Leticia). |
+| ¿Cuánto es esa pérdida? | -$55,886.00 |
+| ¿Coincide con el número de Power BI de S4? | SÍ |
 
 ### Paso 3 — SUM vs AVG: el mismo debate de S2
 
@@ -118,7 +118,7 @@ GROUP BY CiudadID;
 
 | Pregunta | Tu respuesta |
 |---|---|
-| ¿Para decidir si cerrar Leticia, cuál usarías: SUM o AVG? | |
+| ¿Para decidir si cerrar Leticia, cuál usarías: SUM o AVG? | SUM. El total (SUM) muestra la pérdida acumulada que afecta directamente al negocio, mientras que el AVG solo indica el promedio por transacción. |
 
 ---
 
@@ -139,8 +139,8 @@ LIMIT 5;
 
 | Pregunta | Tu respuesta |
 |---|---|
-| ¿Qué columna une las dos tablas? | |
-| ¿Por qué ahora aparece 'Leticia' y no '6'? | |
+| ¿Qué columna une las dos tablas? | CiudadID |
+| ¿Por qué ahora aparece 'Leticia' y no '6'? | Porque el INNER JOIN vinculó la tabla de hechos con DimCiudad para traer el nombre real. |
 
 ### Paso 5 — Doble JOIN: ciudad Y producto
 
@@ -182,9 +182,9 @@ ORDER BY Margen_Aproximado ASC;
 
 | Pregunta | Tu respuesta |
 |---|---|
-| ¿Aparece 'Leticia' con Margen_Aproximado negativo? | SÍ / NO |
-| ¿Cuánto es esa pérdida? | |
-| ¿Coincide este resultado con el dashboard de Power BI de S4? | |
+| ¿Aparece 'Leticia' con Margen_Aproximado negativo? | SÍ |
+| ¿Cuánto es esa pérdida? | -$55,886.00 |
+| ¿Coincide este resultado con el dashboard de Power BI de S4? | SÍ |
 
 ---
 
