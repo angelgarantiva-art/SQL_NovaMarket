@@ -19,6 +19,8 @@ SELECT CiudadID,
     COUNT(*) AS Filas
 FROM FactVentas
 GROUP BY CiudadID;
+--Respuesta paso 1:
+--Retorna 6 filas. Porque agrupa las 500 transacciones según las 6 ciudades únicas que existen en la base de datos.
 -- Paso 2: El veredicto de Leticia con GROUP BY (Usando IDs)
 SELECT CiudadID,
     COUNT(*) AS Transacciones,
@@ -36,6 +38,8 @@ SELECT CiudadID,
 FROM FactVentas
 GROUP BY CiudadID
 ORDER BY Margen_Aproximado ASC;
+--Respuesta paso 2:
+--El análisis evidencia que el CiudadID 6, correspondiente a Leticia, presenta un Margen_Aproximado negativo, registrando una pérdida de aproximadamente -$55,886.00. Además, este resultado coincide con la información reflejada en el dashboard de Power BI de la sesión S4.
 -- Paso 3: SUM vs AVG
 SELECT CiudadID,
     ROUND(SUM(Costo_Envio), 2) AS Costo_TOTAL,
@@ -43,6 +47,8 @@ SELECT CiudadID,
 FROM FactVentas
 WHERE CiudadID = 6
 GROUP BY CiudadID;
+--Respuesta paso 3:
+--SUM. El total (SUM) muestra la pérdida acumulada que afecta directamente al negocio, mientras que el AVG solo indica el promedio por transacción.
 -- ══ PARTE 2 — JOIN (Nombres Reales) ════════════════════════════
 -- Paso 4: El primer JOIN: 'Leticia' en lugar de '6'
 SELECT f.TransaccionID,
@@ -53,6 +59,8 @@ FROM FactVentas f
     INNER JOIN DimCiudad c ON f.CiudadID = c.CiudadID
 WHERE c.Ciudad = 'Leticia'
 LIMIT 5;
+--´Rsepuesta paso 4:
+--Porque el INNER JOIN vinculó la tabla de hechos con DimCiudad para traer el nombre real.
 -- Paso 5: Doble JOIN: ciudad Y producto
 SELECT f.TransaccionID,
     c.Ciudad AS Ciudad,
@@ -105,6 +113,8 @@ FROM FactVentas f
     INNER JOIN DimCiudad c ON f.CiudadID = c.CiudadID
 GROUP BY c.Ciudad
 ORDER BY Margen_Aproximado ASC;
+--Respuesta paso 6:
+--Sí, la ciudad de Leticia aparece con un Margen_Aproximado negativo, reflejando una pérdida de aproximadamente -$55,886.00. Asimismo, este resultado coincide con la información presentada en el dashboard de Power BI de la sesión S4.
 -- ═══════════════════════════════════════════════════════════════
 -- 🚀 PRÁCTICA AUTÓNOMA (ENTREGABLES)
 -- Escribe tus consultas debajo de cada enunciado.
