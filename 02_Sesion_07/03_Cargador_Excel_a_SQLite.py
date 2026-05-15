@@ -4,7 +4,7 @@ import os
 
 # ⚙️ CONFIGURACIÓN INICIAL
 EXCEL_FILE = '04_Ventas_Datos_Limpios_S03.xlsx'
-DATABASE_FILE = 'NovaMarket_S07_Angel.db'
+DATABASE_FILE = 'Novamarket_S07.db'
 
 def cargar_y_modelar():
     print(f"🚀 Iniciando carga desde: {EXCEL_FILE}...")
@@ -17,7 +17,7 @@ def cargar_y_modelar():
         # 2. CONSTRUIR DIMENSIONES (NORMALIZACIÓN)
         # Separamos los 4 productos únicos para el diccionario
         print("🔨 Creando Diccionario de Productos...")
-        dim_producto = df[['Producto', 'Categoria']].drop_duplicates().sort_values('Categoria').groupby('Producto').first().reset_index()
+        dim_producto = df[['Producto', 'Categoria', 'Precio_Unitario', 'Costo_Unitario']].drop_duplicates().sort_values('Categoria').groupby('Producto').first().reset_index()
         dim_producto.insert(0, 'ProductoID', range(1, len(dim_producto) + 1))
         
         # Separamos las 6 ciudades únicas para el diccionario
@@ -32,6 +32,22 @@ def cargar_y_modelar():
             'Bogotá': 'Centro', 'Medellín': 'Andina' # Por si acaso hay tildes
         }
         dim_ciudad['Region'] = dim_ciudad['Ciudad'].map(regiones).fillna('Otro')
+        
+        # Construimos el diccionario de fechas
+        print("🔨 Creando Diccionario de Fechas...")
+        fechas_unicas = pd.to_datetime(df['Fecha']).dt.normalize().unique()
+        dim_fecha = pd.DataFrame({'Fecha': fechas_unicas})
+        dim_fecha['FechaID'] = dim_fecha['Fecha'].dt.strftime('%Y%m%d').astype(int)
+        
+        meses_es = {1:'Enero', 2:'Febrero', 3:'Marzo', 4:'Abril', 5:'Mayo', 6:'Junio', 
+                    7:'Julio', 8:'Agosto', 9:'Septiembre', 10:'Octubre', 11:'Noviembre', 12:'Diciembre'}
+        dim_fecha['NombreMes'] = dim_fecha['Fecha'].dt.month.map(meses_es)
+        
+        dim_fecha['Evento_Especial'] = None
+        dim_fecha.loc[dim_fecha['Fecha'] == '2023-11-24', 'Evento_Especial'] = 'Black Friday'
+        
+        dim_fecha['Fecha'] = dim_fecha['Fecha'].dt.strftime('%Y-%m-%d')
+        dim_fecha = dim_fecha[['FechaID', 'Fecha', 'NombreMes', 'Evento_Especial']]
         
         # 3. CREAR TABLA DE HECHOS (FACTVENTAS)
         # Unimos todo usando IDs para que la base de datos sea eficiente
@@ -48,17 +64,18 @@ def cargar_y_modelar():
         # Seleccionar columnas finales
         fact_ventas = fact_ventas[[
             'ID_Transaccion', 'FechaID', 'ProductoID', 'CiudadID', 
-            'Cantidad', 'Precio_Unitario', 'Descuento_pct', 'Costo_Envio'
+            'Cantidad', 'Precio_Unitario', 'Costo_Unitario', 'Descuento_pct', 'Costo_Envio'
         ]].rename(columns={'ID_Transaccion': 'TransaccionID', 'Precio_Unitario': 'Precio_Venta', 'Descuento_pct': 'Descuento_Pct'})
 
         # 4. GUARDAR EN LA BASE DE DATOS SQLITE
         conn = sqlite3.connect(DATABASE_FILE)
         dim_producto.to_sql('DimProducto', conn, if_exists='replace', index=False)
         dim_ciudad.to_sql('DimCiudad',     conn, if_exists='replace', index=False)
+        dim_fecha.to_sql('DimFecha',       conn, if_exists='replace', index=False)
         fact_ventas.to_sql('FactVentas',   conn, if_exists='replace', index=False)
         
         print(f"✅ ¡Éxito! Base de Datos '{DATABASE_FILE}' creada.")
-        print(f"📊 Resumen: Sales: {len(fact_ventas)} | Ciudades: {len(dim_ciudad)} | Productos: {len(dim_producto)}")
+        print(f"📊 Resumen: Sales: {len(fact_ventas)} | Ciudades: {len(dim_ciudad)} | Productos: {len(dim_producto)} | Fechas: {len(dim_fecha)}")
         conn.close()
         
     except Exception as e:
